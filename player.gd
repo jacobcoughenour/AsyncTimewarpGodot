@@ -11,20 +11,22 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var projection_rect: TextureRect = get_node("ProjectionRect")
 @onready var viewport: SubViewport = get_node("CameraPivot/SubViewport")
 @onready var camera: Camera3D = get_node("CameraPivot/SubViewport/Cam")
-@onready var depth_viewport: SubViewport = get_node("CameraPivot/DepthViewport")
-@onready var depth_camera: Camera3D = get_node("CameraPivot/DepthViewport/DepthCam")
-@onready var depth_quad: MeshInstance3D = get_node("CameraPivot/DepthViewport/DepthQuad")
+@onready var depth_viewport: SubViewport = get_node("SubViewportContainer/DepthViewport")
+@onready var depth_camera: Camera3D = get_node("SubViewportContainer/DepthViewport/DepthCam")
+@onready var depth_quad: MeshInstance3D = get_node("SubViewportContainer/DepthViewport/DepthQuad")
 
-@onready var enabled_checkbox: CheckBox = get_node("ControlPanel/VBoxContainer/EnabledCheckbox")
+@onready var enabled_checkbox: CheckBox = get_node("%EnabledCheckbox")
 
-@onready var freeze_checkbox: CheckBox = get_node("ControlPanel/VBoxContainer/FreezeCheckbox")
-@onready var stretch_checkbox: CheckBox = get_node("ControlPanel/VBoxContainer/StretchCheckbox")
-@onready var reproject_checkbox: CheckBox = get_node("ControlPanel/VBoxContainer/ReprojectCheckbox")
+@onready var vbox_container: VBoxContainer = get_node("%CollapseContainer")
 
-@onready var fps_slider: Slider = get_node("ControlPanel/VBoxContainer/TargetFPSSlider")
-@onready var fps_label: Label = get_node("ControlPanel/VBoxContainer/HBoxContainer/TargetFPSLabel")
+@onready var freeze_checkbox: CheckBox = get_node("%FreezeCheckbox")
+@onready var stretch_checkbox: CheckBox = get_node("%StretchCheckbox")
+@onready var reproject_checkbox: CheckBox = get_node("%ReprojectCheckbox")
 
-var is_enabled = true
+@onready var fps_slider: Slider = get_node("%TargetFPSSlider")
+@onready var fps_label: Label = get_node("%TargetFPSLabel")
+
+var is_enabled = false
 
 var stretch_borders = false
 var reproject_movement = false
@@ -34,6 +36,7 @@ var target_fps = 30
 func _ready():
 	var img = viewport.get_texture()
 	var depth = depth_viewport.get_texture()
+
 	var mat = projection_rect.material as ShaderMaterial
 	mat.set_shader_parameter("cam_texture", img)
 	mat.set_shader_parameter("depth_texture", depth)
@@ -46,10 +49,7 @@ func _ready():
 	enabled_checkbox.button_pressed = is_enabled
 	enabled_checkbox.toggled.connect(enable_toggled)
 
-	freeze_checkbox.disabled = !is_enabled
-	stretch_checkbox.disabled = !is_enabled
-	reproject_checkbox.disabled = !is_enabled
-	fps_slider.editable = !is_enabled
+	vbox_container.visible = is_enabled
 
 	freeze_checkbox.button_pressed = freeze_cam
 	freeze_checkbox.toggled.connect(freeze_toggled)
@@ -68,10 +68,7 @@ func _ready():
 
 func enable_toggled(val: bool):
 	is_enabled = val
-	freeze_checkbox.disabled = !is_enabled
-	stretch_checkbox.disabled = !is_enabled
-	reproject_checkbox.disabled = !is_enabled
-	fps_slider.editable = !is_enabled
+	vbox_container.visible = is_enabled
 
 func freeze_toggled(val: bool):
 	freeze_cam = val
@@ -95,10 +92,7 @@ func _process(delta):
 	if Input.is_action_just_pressed("toggle_all"):
 		is_enabled = !is_enabled
 		enabled_checkbox.button_pressed = is_enabled
-		freeze_checkbox.disabled = !is_enabled
-		stretch_checkbox.disabled = !is_enabled
-		reproject_checkbox.disabled = !is_enabled
-		fps_slider.editable = !is_enabled
+		vbox_container.visible = is_enabled
 
 	if Input.is_action_just_pressed("toggle_freeze"):
 		freeze_cam = !freeze_cam
@@ -158,7 +152,7 @@ func _process(delta):
 			next_frame = 0
 
 			viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-			depth_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+#			depth_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 	#		await RenderingServer.frame_post_draw
 
@@ -177,10 +171,12 @@ func _process(delta):
 	#		depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		else:
 			viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-			depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+#			depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 			next_frame += delta
 	else:
 		viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		depth_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+
 
 
 func _physics_process(delta):

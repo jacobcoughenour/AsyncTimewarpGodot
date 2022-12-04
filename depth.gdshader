@@ -6,8 +6,6 @@ void vertex() {
 }
 
 void fragment() {
-	// Place fragment code here.
-	
-	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).x;
+	float depth = textureLod(DEPTH_TEXTURE, SCREEN_UV, 0.0).r;
 	ALBEDO = vec3(depth);
 }

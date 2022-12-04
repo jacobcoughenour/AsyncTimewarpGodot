@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dnocrbx471nay"]
+[gd_scene load_steps=10 format=3 uid="uid://dnocrbx471nay"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_i7plm"]
 [ext_resource type="Shader" path="res://depth.gdshader" id="2_e8qh0"]
@@ -6,21 +6,13 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ncynv"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_sdf5c"]
-render_priority = 0
-shader = ExtResource("2_e8qh0")
-
-[sub_resource type="QuadMesh" id="QuadMesh_rnsxe"]
-flip_faces = true
-size = Vector2(2, 2)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nh0e3"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hoydj"]
 shader = ExtResource("2_vemwh")
 shader_parameter/bottom_left = null
 shader_parameter/bottom_right = null
 shader_parameter/cam_forward = null
 shader_parameter/cam_pos = null
-shader_parameter/clear_color = Color(1, 0, 1, 1)
+shader_parameter/clear_color = null
 shader_parameter/far_clip = null
 shader_parameter/frozen_bottom_left = null
 shader_parameter/frozen_bottom_right = null
@@ -34,14 +26,35 @@ shader_parameter/is_enabled = null
 shader_parameter/near_clip = null
 shader_parameter/projection_matrix = null
 shader_parameter/reproject_movement = null
+shader_parameter/reprojection_distance = null
+shader_parameter/reprojection_steps = null
 shader_parameter/stretch_borders = null
 shader_parameter/tint = null
 shader_parameter/top_left = null
 shader_parameter/top_right = null
 shader_parameter/world_to_camera_matrix = null
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_hu2cp"]
-viewport_path = NodePath("CameraPivot/SubViewport")
+[sub_resource type="ViewportTexture" id="ViewportTexture_gi36m"]
+viewport_path = NodePath("CameraPivot/DepthViewport")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sdf5c"]
+render_priority = 0
+shader = ExtResource("2_e8qh0")
+
+[sub_resource type="QuadMesh" id="QuadMesh_rnsxe"]
+flip_faces = true
+size = Vector2(2, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m56w6"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.145098, 0.168627, 0.282353, 0.737255)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_i7plm")
@@ -60,9 +73,28 @@ render_target_update_mode = 4
 [node name="Cam" type="Camera3D" parent="CameraPivot/SubViewport"]
 cull_mask = 983039
 
-[node name="DepthViewport" type="SubViewport" parent="CameraPivot"]
+[node name="ProjectionRect" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_hoydj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("ViewportTexture_gi36m")
 
-[node name="DepthQuad" type="MeshInstance3D" parent="CameraPivot/DepthViewport"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+visible = false
+offset_left = 923.0
+offset_top = 472.0
+offset_right = 1255.0
+offset_bottom = 693.0
+stretch = true
+
+[node name="DepthViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+render_target_update_mode = 0
+
+[node name="DepthQuad" type="MeshInstance3D" parent="SubViewportContainer/DepthViewport"]
 visible = false
 layers = 65536
 material_override = SubResource("ShaderMaterial_sdf5c")
@@ -70,55 +102,93 @@ cast_shadow = 0
 extra_cull_margin = 16384.0
 mesh = SubResource("QuadMesh_rnsxe")
 
-[node name="DepthCam" type="Camera3D" parent="CameraPivot/DepthViewport"]
+[node name="DepthCam" type="Camera3D" parent="SubViewportContainer/DepthViewport"]
 
-[node name="ProjectionRect" type="TextureRect" parent="."]
-material = SubResource("ShaderMaterial_nh0e3")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("ViewportTexture_hu2cp")
+[node name="MarginContainer" type="MarginContainer" parent="."]
+offset_right = 219.0
+offset_bottom = 54.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
-[node name="ControlPanel" type="PanelContainer" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="ControlPanel" type="PanelContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ControlPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel"]
 layout_mode = 2
 
-[node name="EnabledCheckbox" type="CheckBox" parent="ControlPanel/VBoxContainer"]
+[node name="EnabledCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Enable Timewarp"
+text = "Enable Timewarp [Q]"
 
-[node name="FreezeCheckbox" type="CheckBox" parent="ControlPanel/VBoxContainer"]
-layout_mode = 2
-text = "Freeze Cam (F)"
-
-[node name="StretchCheckbox" type="CheckBox" parent="ControlPanel/VBoxContainer"]
-layout_mode = 2
-text = "Stretch Borders"
-
-[node name="ReprojectCheckbox" type="CheckBox" parent="ControlPanel/VBoxContainer"]
-layout_mode = 2
-text = "Reproject Movement"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="ControlPanel/VBoxContainer"]
+[node name="CollapseContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ControlPanel/VBoxContainer/HBoxContainer"]
+[node name="FreezeCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Freeze Cam [F]"
+
+[node name="StretchCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Stretch Borders [T]"
+
+[node name="ReprojectCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reproject Movement [R]"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Target FPS"
 
-[node name="TargetFPSLabel" type="Label" parent="ControlPanel/VBoxContainer/HBoxContainer"]
+[node name="TargetFPSLabel" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "20"
 
-[node name="TargetFPSSlider" type="HSlider" parent="ControlPanel/VBoxContainer"]
+[node name="TargetFPSSlider" type="HSlider" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 min_value = 10.0
 step = 10.0
 value = 10.0
 tick_count = 10
+
+[node name="MarginContainer2" type="MarginContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -10.0
+offset_bottom = 10.0
+grow_horizontal = 0
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+
+[node name="Panel" type="PanelContainer" parent="MarginContainer2"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
+
+[node name="FpsLabel" type="Label" parent="MarginContainer2/Panel"]
+layout_mode = 2
+text = "120 FPS"
+vertical_alignment = 1
