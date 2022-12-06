@@ -1,6 +1,7 @@
-[gd_scene load_steps=15 format=3 uid="uid://djij1ycqmsy73"]
+[gd_scene load_steps=22 format=3 uid="uid://djij1ycqmsy73"]
 
 [ext_resource type="PackedScene" uid="uid://dnocrbx471nay" path="res://player.tscn" id="1_nvviw"]
+[ext_resource type="Script" path="res://AnimationPlayer.gd" id="2_7786t"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_wbtm7"]
 
@@ -34,11 +35,59 @@ material = SubResource("StandardMaterial3D_bh5aq")
 [sub_resource type="SphereMesh" id="SphereMesh_w60u6"]
 material = SubResource("StandardMaterial3D_8wuqm")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l3fxx"]
+metallic = 1.0
+metallic_specular = 1.0
+roughness = 0.0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_bx7w5"]
+material = SubResource("StandardMaterial3D_l3fxx")
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kvq83"]
 albedo_color = Color(0.356863, 0.447059, 1, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6ubgr"]
 albedo_color = Color(0, 0.572549, 0.356863, 1)
+
+[sub_resource type="Animation" id="Animation_sjavg"]
+resource_name = "New Anim"
+length = 5.0
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(-3.99186, 0.454227, 11.2079), Vector3(4.73731, 0.454227, 11.2079)]
+}
+
+[sub_resource type="Animation" id="Animation_wa4yg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-3.99186, 0.454227, 11.2079)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_s0wqi"]
+_data = {
+"New Anim": SubResource("Animation_sjavg"),
+"RESET": SubResource("Animation_wa4yg")
+}
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d78px"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_clrpc"]
 albedo_color = Color(0, 0.65098, 0.756863, 1)
@@ -72,6 +121,11 @@ skeleton = NodePath("../Level")
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.85053, 1.56719, -5.10017)
 mesh = SubResource("SphereMesh_w60u6")
+skeleton = NodePath("../Level")
+
+[node name="Mirror" type="MeshInstance3D" parent="."]
+transform = Transform3D(-5.96046e-08, -1, 4.37114e-08, 0, -4.37114e-08, -1, 1, -5.96046e-08, 1.77636e-15, 3.18564, 0.96719, -2.76777)
+mesh = SubResource("PlaneMesh_bx7w5")
 skeleton = NodePath("../Level")
 
 [node name="Level" type="Node3D" parent="."]
@@ -141,6 +195,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.11889, 1.02621, 16.2079)
 material_override = SubResource("StandardMaterial3D_kvq83")
 use_collision = true
 size = Vector3(2, 4, 2)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Level"]
+root_node = NodePath("CSGBox3D18")
+libraries = {
+"": SubResource("AnimationLibrary_s0wqi")
+}
+script = ExtResource("2_7786t")
+
+[node name="CSGBox3D18" type="CSGBox3D" parent="Level/AnimationPlayer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.99186, 0.454227, 11.2079)
+use_collision = true
+material = SubResource("StandardMaterial3D_d78px")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.00051, 1.83903, -5.75562)

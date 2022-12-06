@@ -15,16 +15,21 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var depth_camera: Camera3D = get_node("SubViewportContainer/DepthViewport/DepthCam")
 @onready var depth_quad: MeshInstance3D = get_node("SubViewportContainer/DepthViewport/DepthQuad")
 
+@onready var vsync_button: OptionButton = get_node("%VsyncOptionButton")
 @onready var enabled_checkbox: CheckBox = get_node("%EnabledCheckbox")
-
 @onready var vbox_container: VBoxContainer = get_node("%CollapseContainer")
 
 @onready var freeze_checkbox: CheckBox = get_node("%FreezeCheckbox")
 @onready var stretch_checkbox: CheckBox = get_node("%StretchCheckbox")
 @onready var reproject_checkbox: CheckBox = get_node("%ReprojectCheckbox")
 
-@onready var fps_slider: Slider = get_node("%TargetFPSSlider")
-@onready var fps_label: Label = get_node("%TargetFPSLabel")
+@onready var target_fps_slider: Slider = get_node("%TargetFPSSlider")
+@onready var target_fps_label: Label = get_node("%TargetFPSLabel")
+
+@onready var limit_fps_slider: Slider = get_node("%LimitFPSSlider")
+@onready var limit_fps_label: Label = get_node("%LimitFPSLabel")
+
+@onready var fps_label: Label = get_node("%FpsLabel")
 
 var is_enabled = false
 
@@ -60,9 +65,19 @@ func _ready():
 	reproject_checkbox.button_pressed = reproject_movement
 	reproject_checkbox.toggled.connect(reproject_toggled)
 
-	fps_slider.value = target_fps
-	fps_label.text = "%d" % target_fps
-	fps_slider.value_changed.connect(fps_slider_changed)
+	target_fps_slider.value = target_fps
+	target_fps_label.text = "%d" % target_fps
+	target_fps_slider.value_changed.connect(fps_slider_changed)
+
+	limit_fps_slider.value = Engine.max_fps
+	if Engine.max_fps == 0:
+		limit_fps_label.text = "none"
+	else:
+		limit_fps_label.text = "%d" % Engine.max_fps
+	limit_fps_slider.value_changed.connect(fps_limit_slider_changed)
+
+	vsync_button.selected = DisplayServer.window_get_vsync_mode()
+	vsync_button.item_selected.connect(vsync_button_changed)
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
@@ -81,13 +96,27 @@ func reproject_toggled(val: bool):
 
 func fps_slider_changed(val: float):
 	target_fps = val
-	fps_label.text = "%d" % val
+	target_fps_label.text = "%d" % val
+
+func fps_limit_slider_changed(val: float):
+	Engine.max_fps = val
+	if Engine.max_fps == 0:
+		limit_fps_label.text = "none"
+	else:
+		limit_fps_label.text = "%d" % Engine.max_fps
+
+func vsync_button_changed(val: int):
+	DisplayServer.window_set_vsync_mode(val)
 
 var next_frame = 0
 
 func _process(delta):
 
-	var frame_time = 1 / target_fps
+	var frame_time = 1 / float(target_fps)
+
+	var size = get_viewport().size
+
+	fps_label.text = "%dx%d @ %d FPS" % [size.x, size.y, Engine.get_frames_per_second()]
 
 	if Input.is_action_just_pressed("toggle_all"):
 		is_enabled = !is_enabled
@@ -108,7 +137,6 @@ func _process(delta):
 
 	# update camera
 
-	var size = get_viewport().size
 	var sizef = Vector2(size)
 	viewport.size = size
 	depth_viewport.size = size
@@ -125,17 +153,14 @@ func _process(delta):
 		mat.set_shader_parameter("reproject_movement", reproject_movement)
 
 		# update the projection cam in the shader with the actual camera postition
-		# todo find a better way to send the camera frustum and transform to the shader
 		mat.set_shader_parameter("near_clip", camera.near)
 		mat.set_shader_parameter("far_clip", camera.far)
 		mat.set_shader_parameter("cam_pos", camera.global_position)
 		mat.set_shader_parameter("cam_forward", -camera.global_transform.basis.z)
 
 		var projection = Projection.create_perspective(camera.fov, size.aspect(), camera.near, camera.far, false)
-
 		var view_mat = Projection(camera.global_transform).inverse()
 		var proj_mat = projection
-
 		mat.set_shader_parameter("world_to_camera_matrix", view_mat)
 		mat.set_shader_parameter("projection_matrix", proj_mat)
 
@@ -151,10 +176,11 @@ func _process(delta):
 		if next_frame >= frame_time and not freeze_cam:
 			next_frame = 0
 
+			# todo
+			# this will update the viewports in the next frame and not this frame.
+			# this means the uniforms we are sending here are 1 frame out of date.
 			viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-#			depth_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-
-	#		await RenderingServer.frame_post_draw
+			depth_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 			# update frozen cam position but only when we render a new frame from the camera
 			mat.set_shader_parameter("frozen_cam_pos", camera.global_position)
@@ -167,17 +193,13 @@ func _process(delta):
 			mat.set_shader_parameter("frozen_world_to_camera_matrix", Projection(view_mat))
 			mat.set_shader_parameter("frozen_projection_matrix", Projection(proj_mat))
 
-	#		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	#		depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		else:
 			viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-#			depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+			depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 			next_frame += delta
 	else:
 		viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		depth_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-
-
 
 func _physics_process(delta):
 	# Add the gravity.

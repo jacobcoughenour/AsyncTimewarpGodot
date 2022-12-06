@@ -1,8 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://dnocrbx471nay"]
+[gd_scene load_steps=11 format=3 uid="uid://dnocrbx471nay"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_i7plm"]
 [ext_resource type="Shader" path="res://depth.gdshader" id="2_e8qh0"]
 [ext_resource type="Shader" path="res://projector.gdshader" id="2_vemwh"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_pvclt"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ncynv"]
 
@@ -27,6 +29,7 @@ shader_parameter/near_clip = null
 shader_parameter/projection_matrix = null
 shader_parameter/reproject_movement = null
 shader_parameter/reprojection_distance = null
+shader_parameter/reprojection_ray_distance = null
 shader_parameter/reprojection_steps = null
 shader_parameter/stretch_borders = null
 shader_parameter/tint = null
@@ -58,6 +61,12 @@ corner_radius_bottom_left = 10
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_i7plm")
+
+[node name="PlayerMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+cast_shadow = 3
+gi_mode = 0
+mesh = SubResource("CapsuleMesh_pvclt")
 
 [node name="PlayerCollider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -113,62 +122,127 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
 [node name="ControlPanel" type="PanelContainer" parent="MarginContainer"]
-layout_mode = 2
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 209.0
+offset_bottom = 141.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel"]
-layout_mode = 2
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 194.0
+offset_bottom = 126.0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
+offset_right = 189.0
+offset_bottom = 51.0
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer"]
+offset_left = 5.0
+offset_right = 184.0
+offset_bottom = 46.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer"]
+offset_right = 179.0
+offset_bottom = 26.0
+
+[node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+offset_right = 156.0
+offset_bottom = 26.0
+size_flags_horizontal = 3
+text = "FPS Limit"
+
+[node name="LimitFPSLabel" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+offset_left = 160.0
+offset_right = 179.0
+offset_bottom = 26.0
+text = "20"
+
+[node name="LimitFPSSlider" type="HSlider" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+offset_top = 30.0
+offset_right = 179.0
+offset_bottom = 46.0
+max_value = 360.0
+value = 120.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
+offset_top = 55.0
+offset_right = 189.0
+offset_bottom = 86.0
+
+[node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/HBoxContainer"]
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 28.0
+text = "VSync"
+
+[node name="VsyncOptionButton" type="OptionButton" parent="MarginContainer/ControlPanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+offset_left = 50.0
+offset_right = 189.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+item_count = 4
+popup/item_0/text = "Disabled"
+popup/item_0/id = 0
+popup/item_1/text = "Enabled"
+popup/item_1/id = 1
+popup/item_2/text = "Adaptive"
+popup/item_2/id = 2
+popup/item_3/text = "Mailbox"
+popup/item_3/id = 3
 
 [node name="EnabledCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer"]
 unique_name_in_owner = true
-layout_mode = 2
+offset_top = 90.0
+offset_right = 189.0
+offset_bottom = 121.0
 text = "Enable Timewarp [Q]"
 
 [node name="CollapseContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
-layout_mode = 2
 
 [node name="FreezeCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
 unique_name_in_owner = true
-layout_mode = 2
 text = "Freeze Cam [F]"
 
 [node name="StretchCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
 unique_name_in_owner = true
-layout_mode = 2
 text = "Stretch Borders [T]"
 
 [node name="ReprojectCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
 unique_name_in_owner = true
-layout_mode = 2
 text = "Reproject Movement [R]"
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
-layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer"]
-layout_mode = 2
+offset_left = 5.0
+offset_right = 109.0
+offset_bottom = 46.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
 size_flags_horizontal = 3
 text = "Target FPS"
 
 [node name="TargetFPSLabel" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
-layout_mode = 2
 text = "20"
 
 [node name="TargetFPSSlider" type="HSlider" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
-layout_mode = 2
 min_value = 10.0
 step = 10.0
 value = 10.0
@@ -185,10 +259,20 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 
 [node name="Panel" type="PanelContainer" parent="MarginContainer2"]
-layout_mode = 2
+offset_top = 10.0
+offset_right = 69.0
+offset_bottom = 46.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
-[node name="FpsLabel" type="Label" parent="MarginContainer2/Panel"]
-layout_mode = 2
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer2/Panel"]
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 64.0
+offset_bottom = 31.0
+
+[node name="FpsLabel" type="Label" parent="MarginContainer2/Panel/VBoxContainer"]
+unique_name_in_owner = true
+offset_right = 59.0
+offset_bottom = 26.0
 text = "120 FPS"
 vertical_alignment = 1
