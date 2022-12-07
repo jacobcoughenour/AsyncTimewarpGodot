@@ -56,7 +56,7 @@ vec2 world_to_screen_pos(vec3 pos, mat4 proj_matrix, mat4 view_matrix, vec3 cam_
 
 float get_depth(vec2 uv) {
 	float b = texture(depth_texture, uv).r;
-	// this is how LinearEyeDepth() from unity works
+	// this is a port of LinearEyeDepth() from unity
 	float d = 1.0 / (((1.0 - far_clip / near_clip) / far_clip) * b + ((far_clip / near_clip) / far_clip));
 	return d * 1.0f;
 }

@@ -19,6 +19,8 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var compare_viewport: SubViewport = get_node("%CompareViewport")
 @onready var compare_viewport_container: SubViewportContainer = get_node("%CompareViewportContainer")
 
+@onready var menu: Node = get_node("Menu")
+
 @onready var vsync_button: OptionButton = get_node("%VsyncOptionButton")
 @onready var enabled_checkbox: CheckBox = get_node("%EnabledCheckbox")
 @onready var timewarp_settings: VBoxContainer = get_node("%TimewarpSettings")
@@ -37,14 +39,12 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var fps_label: Label = get_node("%FpsLabel")
 
 # default settings
-
 var timewarp_enabled = true
-
 var stretch_borders = true
 var reproject_movement = true
 var freeze_cam = false
 var target_fps = 30
-var compare_enabled = true
+var compare_enabled = false
 
 func _ready():
 
@@ -132,6 +132,9 @@ func _process(delta):
 	var size = get_viewport().size
 
 	fps_label.text = "%dx%d @ %d FPS" % [size.x, size.y, Engine.get_frames_per_second()]
+
+	if Input.is_action_just_pressed("toggle_menu"):
+		menu.visible = !menu.visible
 
 	if Input.is_action_just_pressed("toggle_all"):
 		timewarp_enabled = !timewarp_enabled

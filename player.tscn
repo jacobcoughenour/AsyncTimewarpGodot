@@ -130,80 +130,68 @@ mesh = SubResource("QuadMesh_rnsxe")
 [node name="DepthCam" type="Camera3D" parent="DepthViewportContainer/DepthViewport"]
 unique_name_in_owner = true
 
-[node name="LeftControlPanel" type="MarginContainer" parent="."]
+[node name="Menu" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LeftControlPanel" type="MarginContainer" parent="Menu"]
+layout_mode = 0
 offset_right = 219.0
-offset_bottom = 54.0
+offset_bottom = 151.0
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="Panel" type="PanelContainer" parent="LeftControlPanel"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 235.0
-offset_bottom = 336.0
+[node name="Panel" type="PanelContainer" parent="Menu/LeftControlPanel"]
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="LeftControlPanel/Panel"]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 220.0
-offset_bottom = 321.0
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu/LeftControlPanel/Panel"]
+layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="LeftControlPanel/Panel/VBoxContainer"]
-offset_right = 215.0
-offset_bottom = 51.0
+[node name="MarginContainer" type="MarginContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer"]
+layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer"]
-offset_left = 5.0
-offset_right = 210.0
-offset_bottom = 46.0
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer/MarginContainer"]
+layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer"]
-offset_right = 205.0
-offset_bottom = 26.0
+[node name="HBoxContainer" type="HBoxContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
 
-[node name="Label" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-offset_right = 182.0
-offset_bottom = 26.0
+[node name="Label" type="Label" parent="Menu/LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
 size_flags_horizontal = 3
 text = "FPS Limit"
 
-[node name="LimitFPSLabel" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="LimitFPSLabel" type="Label" parent="Menu/LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
-offset_left = 186.0
-offset_right = 205.0
-offset_bottom = 26.0
+layout_mode = 2
 text = "20"
 
-[node name="LimitFPSSlider" type="HSlider" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer"]
+[node name="LimitFPSSlider" type="HSlider" parent="Menu/LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
-offset_top = 30.0
-offset_right = 205.0
-offset_bottom = 46.0
+layout_mode = 2
 max_value = 360.0
 value = 120.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer"]
-offset_top = 55.0
-offset_right = 215.0
-offset_bottom = 86.0
+[node name="HBoxContainer" type="HBoxContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer"]
+layout_mode = 2
 
-[node name="Label" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/HBoxContainer"]
-offset_top = 2.0
-offset_right = 46.0
-offset_bottom = 28.0
+[node name="Label" type="Label" parent="Menu/LeftControlPanel/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
 text = "VSync"
 
-[node name="VsyncOptionButton" type="OptionButton" parent="LeftControlPanel/Panel/VBoxContainer/HBoxContainer"]
+[node name="VsyncOptionButton" type="OptionButton" parent="Menu/LeftControlPanel/Panel/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
-offset_left = 50.0
-offset_right = 215.0
-offset_bottom = 31.0
+layout_mode = 2
 size_flags_horizontal = 3
 item_count = 4
 popup/item_0/text = "Disabled"
@@ -215,111 +203,101 @@ popup/item_2/id = 2
 popup/item_3/text = "Mailbox"
 popup/item_3/id = 3
 
-[node name="EnabledCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer"]
+[node name="EnabledCheckbox" type="CheckBox" parent="Menu/LeftControlPanel/Panel/VBoxContainer"]
 unique_name_in_owner = true
-offset_top = 90.0
-offset_right = 215.0
-offset_bottom = 121.0
+layout_mode = 2
 text = "Enable Timewarp [Q]"
 
-[node name="TimewarpSettings" type="VBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer"]
+[node name="TimewarpSettings" type="VBoxContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer"]
 unique_name_in_owner = true
-offset_top = 125.0
-offset_right = 215.0
-offset_bottom = 316.0
+visible = false
+layout_mode = 2
 
-[node name="FreezeCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+[node name="FreezeCheckbox" type="CheckBox" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
-offset_right = 215.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "Freeze Cam [F]"
 
-[node name="StretchCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+[node name="StretchCheckbox" type="CheckBox" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
-offset_top = 35.0
-offset_right = 215.0
-offset_bottom = 66.0
+layout_mode = 2
 text = "Stretch Borders [T]"
 
-[node name="ReprojectCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+[node name="ReprojectCheckbox" type="CheckBox" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
-offset_top = 70.0
-offset_right = 215.0
-offset_bottom = 101.0
+layout_mode = 2
 text = "Reproject Movement [R]"
 
-[node name="MarginContainer" type="MarginContainer" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
-offset_top = 105.0
-offset_right = 215.0
-offset_bottom = 156.0
+[node name="MarginContainer" type="MarginContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer"]
-offset_left = 5.0
-offset_right = 210.0
-offset_bottom = 46.0
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer"]
+layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer"]
-offset_right = 205.0
-offset_bottom = 26.0
+[node name="HBoxContainer" type="HBoxContainer" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer"]
+layout_mode = 2
 
-[node name="Label" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer/HBoxContainer"]
-offset_right = 182.0
-offset_bottom = 26.0
+[node name="Label" type="Label" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Target FPS"
 
-[node name="TargetFPSLabel" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="TargetFPSLabel" type="Label" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
-offset_left = 186.0
-offset_right = 205.0
-offset_bottom = 26.0
+layout_mode = 2
 text = "20"
 
-[node name="TargetFPSSlider" type="HSlider" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer"]
+[node name="TargetFPSSlider" type="HSlider" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
-offset_top = 30.0
-offset_right = 205.0
-offset_bottom = 46.0
+layout_mode = 2
 min_value = 10.0
 step = 10.0
 value = 10.0
 tick_count = 10
 
-[node name="CompareCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+[node name="CompareCheckbox" type="CheckBox" parent="Menu/LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
-offset_top = 160.0
-offset_right = 215.0
-offset_bottom = 191.0
+layout_mode = 2
 text = "Compare [C]"
 
-[node name="RightControlPanel" type="MarginContainer" parent="."]
+[node name="RightControlPanel" type="MarginContainer" parent="Menu"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -10.0
-offset_bottom = 10.0
+offset_left = -79.0
+offset_bottom = 46.0
 grow_horizontal = 0
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 
-[node name="Panel" type="PanelContainer" parent="RightControlPanel"]
-offset_top = 10.0
-offset_right = 69.0
-offset_bottom = 46.0
+[node name="Panel" type="PanelContainer" parent="Menu/RightControlPanel"]
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="RightControlPanel/Panel"]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 64.0
-offset_bottom = 31.0
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu/RightControlPanel/Panel"]
+layout_mode = 2
 
-[node name="FpsLabel" type="Label" parent="RightControlPanel/Panel/VBoxContainer"]
+[node name="FpsLabel" type="Label" parent="Menu/RightControlPanel/Panel/VBoxContainer"]
 unique_name_in_owner = true
-offset_right = 59.0
-offset_bottom = 26.0
+layout_mode = 2
 text = "120 FPS"
 vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 142.0
+grow_vertical = 0
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="Label" type="Label" parent="MarginContainer"]
+layout_mode = 2
+text = "[Tab] Toggle Menu
+[Esc] Toggle Mouse Lock"
