@@ -2,9 +2,12 @@ shader_type canvas_item;
 render_mode skip_vertex_transform;
 
 uniform bool is_enabled = false;
+uniform bool compare_enabled = false;
 
 uniform sampler2D cam_texture : hint_default_white;
 uniform sampler2D depth_texture : hint_default_white;
+uniform sampler2D compare_texture : hint_default_white;
+
 uniform vec4 tint : source_color = vec4(1.0);
 uniform vec4 clear_color : source_color = vec4(0.0);
 
@@ -55,7 +58,7 @@ float get_depth(vec2 uv) {
 	float b = texture(depth_texture, uv).r;
 	// this is how LinearEyeDepth() from unity works
 	float d = 1.0 / (((1.0 - far_clip / near_clip) / far_clip) * b + ((far_clip / near_clip) / far_clip));
-	return d * 0.1f;
+	return d * 1.0f;
 }
 
 vec3 get_world_pos(vec3 camera_vector, vec3 camera_forward, vec3 camera_pos, vec2 uv) {
@@ -161,10 +164,13 @@ void fragment() {
 				COLOR = vec4(main_tex_down, 1.0f);
 		}
 		
+		if (compare_enabled && UV.x > 0.5f) {
+			COLOR = texture(compare_texture, UV);
+		}
+		
 	} else {
 		COLOR = texture(cam_texture, UV);
 	}
-	
 	
 }
 

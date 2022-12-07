@@ -15,6 +15,7 @@ shader_parameter/bottom_right = null
 shader_parameter/cam_forward = null
 shader_parameter/cam_pos = null
 shader_parameter/clear_color = null
+shader_parameter/compare_enabled = null
 shader_parameter/far_clip = null
 shader_parameter/frozen_bottom_left = null
 shader_parameter/frozen_bottom_right = null
@@ -75,23 +76,36 @@ shape = SubResource("CapsuleShape3D_ncynv")
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
-[node name="SubViewport" type="SubViewport" parent="CameraPivot"]
+[node name="CamViewport" type="SubViewport" parent="."]
 handle_input_locally = false
 render_target_update_mode = 4
 
-[node name="Cam" type="Camera3D" parent="CameraPivot/SubViewport"]
+[node name="Cam" type="Camera3D" parent="CamViewport"]
+unique_name_in_owner = true
+cull_mask = 983039
+
+[node name="CompareViewport" type="SubViewport" parent="."]
+unique_name_in_owner = true
+handle_input_locally = false
+render_target_update_mode = 4
+
+[node name="CompareCam" type="Camera3D" parent="CompareViewport"]
+unique_name_in_owner = true
 cull_mask = 983039
 
 [node name="ProjectionRect" type="TextureRect" parent="."]
+unique_name_in_owner = true
 material = SubResource("ShaderMaterial_hoydj")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
 texture = SubResource("ViewportTexture_gi36m")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+[node name="DepthViewportContainer" type="SubViewportContainer" parent="."]
+unique_name_in_owner = true
 visible = false
 offset_left = 923.0
 offset_top = 472.0
@@ -99,11 +113,13 @@ offset_right = 1255.0
 offset_bottom = 693.0
 stretch = true
 
-[node name="DepthViewport" type="SubViewport" parent="SubViewportContainer"]
+[node name="DepthViewport" type="SubViewport" parent="DepthViewportContainer"]
+unique_name_in_owner = true
 handle_input_locally = false
 render_target_update_mode = 0
 
-[node name="DepthQuad" type="MeshInstance3D" parent="SubViewportContainer/DepthViewport"]
+[node name="DepthQuad" type="MeshInstance3D" parent="DepthViewportContainer/DepthViewport"]
+unique_name_in_owner = true
 visible = false
 layers = 65536
 material_override = SubResource("ShaderMaterial_sdf5c")
@@ -111,9 +127,10 @@ cast_shadow = 0
 extra_cull_margin = 16384.0
 mesh = SubResource("QuadMesh_rnsxe")
 
-[node name="DepthCam" type="Camera3D" parent="SubViewportContainer/DepthViewport"]
+[node name="DepthCam" type="Camera3D" parent="DepthViewportContainer/DepthViewport"]
+unique_name_in_owner = true
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="LeftControlPanel" type="MarginContainer" parent="."]
 offset_right = 219.0
 offset_bottom = 54.0
 theme_override_constants/margin_left = 10
@@ -121,71 +138,71 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="ControlPanel" type="PanelContainer" parent="MarginContainer"]
+[node name="Panel" type="PanelContainer" parent="LeftControlPanel"]
 offset_left = 10.0
 offset_top = 10.0
-offset_right = 209.0
-offset_bottom = 141.0
+offset_right = 235.0
+offset_bottom = 336.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="LeftControlPanel/Panel"]
 offset_left = 5.0
 offset_top = 5.0
-offset_right = 194.0
-offset_bottom = 126.0
+offset_right = 220.0
+offset_bottom = 321.0
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
-offset_right = 189.0
+[node name="MarginContainer" type="MarginContainer" parent="LeftControlPanel/Panel/VBoxContainer"]
+offset_right = 215.0
 offset_bottom = 51.0
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer"]
 offset_left = 5.0
-offset_right = 184.0
+offset_right = 210.0
 offset_bottom = 46.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer"]
-offset_right = 179.0
+[node name="HBoxContainer" type="HBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer"]
+offset_right = 205.0
 offset_bottom = 26.0
 
-[node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-offset_right = 156.0
+[node name="Label" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+offset_right = 182.0
 offset_bottom = 26.0
 size_flags_horizontal = 3
 text = "FPS Limit"
 
-[node name="LimitFPSLabel" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="LimitFPSLabel" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
-offset_left = 160.0
-offset_right = 179.0
+offset_left = 186.0
+offset_right = 205.0
 offset_bottom = 26.0
 text = "20"
 
-[node name="LimitFPSSlider" type="HSlider" parent="MarginContainer/ControlPanel/VBoxContainer/MarginContainer/VBoxContainer"]
+[node name="LimitFPSSlider" type="HSlider" parent="LeftControlPanel/Panel/VBoxContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 offset_top = 30.0
-offset_right = 179.0
+offset_right = 205.0
 offset_bottom = 46.0
 max_value = 360.0
 value = 120.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer"]
 offset_top = 55.0
-offset_right = 189.0
+offset_right = 215.0
 offset_bottom = 86.0
 
-[node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/HBoxContainer"]
 offset_top = 2.0
 offset_right = 46.0
 offset_bottom = 28.0
 text = "VSync"
 
-[node name="VsyncOptionButton" type="OptionButton" parent="MarginContainer/ControlPanel/VBoxContainer/HBoxContainer"]
+[node name="VsyncOptionButton" type="OptionButton" parent="LeftControlPanel/Panel/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 offset_left = 50.0
-offset_right = 189.0
+offset_right = 215.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 item_count = 4
@@ -198,57 +215,87 @@ popup/item_2/id = 2
 popup/item_3/text = "Mailbox"
 popup/item_3/id = 3
 
-[node name="EnabledCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer"]
+[node name="EnabledCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer"]
 unique_name_in_owner = true
 offset_top = 90.0
-offset_right = 189.0
+offset_right = 215.0
 offset_bottom = 121.0
 text = "Enable Timewarp [Q]"
 
-[node name="CollapseContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer"]
+[node name="TimewarpSettings" type="VBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer"]
 unique_name_in_owner = true
-visible = false
+offset_top = 125.0
+offset_right = 215.0
+offset_bottom = 316.0
 
-[node name="FreezeCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+[node name="FreezeCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
+offset_right = 215.0
+offset_bottom = 31.0
 text = "Freeze Cam [F]"
 
-[node name="StretchCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+[node name="StretchCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
+offset_top = 35.0
+offset_right = 215.0
+offset_bottom = 66.0
 text = "Stretch Borders [T]"
 
-[node name="ReprojectCheckbox" type="CheckBox" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+[node name="ReprojectCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
 unique_name_in_owner = true
+offset_top = 70.0
+offset_right = 215.0
+offset_bottom = 101.0
 text = "Reproject Movement [R]"
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+offset_top = 105.0
+offset_right = 215.0
+offset_bottom = 156.0
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer"]
 offset_left = 5.0
-offset_right = 109.0
+offset_right = 210.0
 offset_bottom = 46.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer"]
+offset_right = 205.0
+offset_bottom = 26.0
 
-[node name="Label" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer/HBoxContainer"]
+offset_right = 182.0
+offset_bottom = 26.0
 size_flags_horizontal = 3
 text = "Target FPS"
 
-[node name="TargetFPSLabel" type="Label" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="TargetFPSLabel" type="Label" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+offset_left = 186.0
+offset_right = 205.0
+offset_bottom = 26.0
 text = "20"
 
-[node name="TargetFPSSlider" type="HSlider" parent="MarginContainer/ControlPanel/VBoxContainer/CollapseContainer/MarginContainer/VBoxContainer"]
+[node name="TargetFPSSlider" type="HSlider" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
+offset_top = 30.0
+offset_right = 205.0
+offset_bottom = 46.0
 min_value = 10.0
 step = 10.0
 value = 10.0
 tick_count = 10
 
-[node name="MarginContainer2" type="MarginContainer" parent="."]
+[node name="CompareCheckbox" type="CheckBox" parent="LeftControlPanel/Panel/VBoxContainer/TimewarpSettings"]
+unique_name_in_owner = true
+offset_top = 160.0
+offset_right = 215.0
+offset_bottom = 191.0
+text = "Compare [C]"
+
+[node name="RightControlPanel" type="MarginContainer" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -258,19 +305,19 @@ grow_horizontal = 0
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 
-[node name="Panel" type="PanelContainer" parent="MarginContainer2"]
+[node name="Panel" type="PanelContainer" parent="RightControlPanel"]
 offset_top = 10.0
 offset_right = 69.0
 offset_bottom = 46.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_m56w6")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer2/Panel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="RightControlPanel/Panel"]
 offset_left = 5.0
 offset_top = 5.0
 offset_right = 64.0
 offset_bottom = 31.0
 
-[node name="FpsLabel" type="Label" parent="MarginContainer2/Panel/VBoxContainer"]
+[node name="FpsLabel" type="Label" parent="RightControlPanel/Panel/VBoxContainer"]
 unique_name_in_owner = true
 offset_right = 59.0
 offset_bottom = 26.0

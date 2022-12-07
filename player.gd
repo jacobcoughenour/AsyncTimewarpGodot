@@ -7,21 +7,26 @@ const JUMP_VELOCITY = 4.5
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
+@onready var projection_rect: TextureRect = get_node("%ProjectionRect")
+
 @onready var cam_pivot: Node3D = get_node("CameraPivot")
-@onready var projection_rect: TextureRect = get_node("ProjectionRect")
-@onready var viewport: SubViewport = get_node("CameraPivot/SubViewport")
-@onready var camera: Camera3D = get_node("CameraPivot/SubViewport/Cam")
-@onready var depth_viewport: SubViewport = get_node("SubViewportContainer/DepthViewport")
-@onready var depth_camera: Camera3D = get_node("SubViewportContainer/DepthViewport/DepthCam")
-@onready var depth_quad: MeshInstance3D = get_node("SubViewportContainer/DepthViewport/DepthQuad")
+@onready var viewport: SubViewport = get_node("CamViewport")
+@onready var camera: Camera3D = get_node("%Cam")
+@onready var depth_viewport: SubViewport = get_node("%DepthViewport")
+@onready var depth_camera: Camera3D = get_node("%DepthCam")
+@onready var depth_quad: MeshInstance3D = get_node("%DepthQuad")
+@onready var compare_cam: Camera3D = get_node("%CompareCam")
+@onready var compare_viewport: SubViewport = get_node("%CompareViewport")
+@onready var compare_viewport_container: SubViewportContainer = get_node("%CompareViewportContainer")
 
 @onready var vsync_button: OptionButton = get_node("%VsyncOptionButton")
 @onready var enabled_checkbox: CheckBox = get_node("%EnabledCheckbox")
-@onready var vbox_container: VBoxContainer = get_node("%CollapseContainer")
+@onready var timewarp_settings: VBoxContainer = get_node("%TimewarpSettings")
 
 @onready var freeze_checkbox: CheckBox = get_node("%FreezeCheckbox")
 @onready var stretch_checkbox: CheckBox = get_node("%StretchCheckbox")
 @onready var reproject_checkbox: CheckBox = get_node("%ReprojectCheckbox")
+@onready var compare_checkbox: CheckBox = get_node("%CompareCheckbox")
 
 @onready var target_fps_slider: Slider = get_node("%TargetFPSSlider")
 @onready var target_fps_label: Label = get_node("%TargetFPSLabel")
@@ -31,39 +36,46 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var fps_label: Label = get_node("%FpsLabel")
 
-var is_enabled = false
+# default settings
 
-var stretch_borders = false
-var reproject_movement = false
+var timewarp_enabled = true
+
+var stretch_borders = true
+var reproject_movement = true
 var freeze_cam = false
 var target_fps = 30
+var compare_enabled = true
 
 func _ready():
+
 	var img = viewport.get_texture()
 	var depth = depth_viewport.get_texture()
+	var compare_tex = compare_viewport.get_texture()
 
 	var mat = projection_rect.material as ShaderMaterial
 	mat.set_shader_parameter("cam_texture", img)
 	mat.set_shader_parameter("depth_texture", depth)
+	mat.set_shader_parameter("compare_texture", compare_tex)
 
 	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	depth_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	compare_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 
 	depth_quad.visible = true
 
-	enabled_checkbox.button_pressed = is_enabled
+	enabled_checkbox.button_pressed = timewarp_enabled
 	enabled_checkbox.toggled.connect(enable_toggled)
 
-	vbox_container.visible = is_enabled
+	timewarp_settings.visible = timewarp_enabled
 
 	freeze_checkbox.button_pressed = freeze_cam
 	freeze_checkbox.toggled.connect(freeze_toggled)
-
 	stretch_checkbox.button_pressed = stretch_borders
 	stretch_checkbox.toggled.connect(stretch_toggled)
-
 	reproject_checkbox.button_pressed = reproject_movement
 	reproject_checkbox.toggled.connect(reproject_toggled)
+	compare_checkbox.button_pressed = compare_enabled
+	compare_checkbox.toggled.connect(compare_toggled)
 
 	target_fps_slider.value = target_fps
 	target_fps_label.text = "%d" % target_fps
@@ -82,8 +94,8 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func enable_toggled(val: bool):
-	is_enabled = val
-	vbox_container.visible = is_enabled
+	timewarp_enabled = val
+	timewarp_settings.visible = timewarp_enabled
 
 func freeze_toggled(val: bool):
 	freeze_cam = val
@@ -105,6 +117,9 @@ func fps_limit_slider_changed(val: float):
 	else:
 		limit_fps_label.text = "%d" % Engine.max_fps
 
+func compare_toggled(val: bool):
+	compare_enabled = val
+
 func vsync_button_changed(val: int):
 	DisplayServer.window_set_vsync_mode(val)
 
@@ -119,9 +134,9 @@ func _process(delta):
 	fps_label.text = "%dx%d @ %d FPS" % [size.x, size.y, Engine.get_frames_per_second()]
 
 	if Input.is_action_just_pressed("toggle_all"):
-		is_enabled = !is_enabled
-		enabled_checkbox.button_pressed = is_enabled
-		vbox_container.visible = is_enabled
+		timewarp_enabled = !timewarp_enabled
+		enabled_checkbox.button_pressed = timewarp_enabled
+		timewarp_settings.visible = timewarp_enabled
 
 	if Input.is_action_just_pressed("toggle_freeze"):
 		freeze_cam = !freeze_cam
@@ -135,30 +150,53 @@ func _process(delta):
 		reproject_movement = !reproject_movement
 		reproject_checkbox.button_pressed = reproject_movement
 
+	if Input.is_action_just_pressed("toggle_compare"):
+		compare_enabled = !compare_enabled
+		compare_checkbox.button_pressed = compare_enabled
+
 	# update camera
 
 	var sizef = Vector2(size)
 	viewport.size = size
 	depth_viewport.size = size
+	compare_viewport.size = size
 
 	camera.global_transform = cam_pivot.global_transform
 	depth_camera.global_transform = cam_pivot.global_transform
+	compare_cam.global_transform = cam_pivot.global_transform
+
+	var fov = camera.fov
+	var near = camera.near
+	var far = camera.far
+
+	depth_camera.fov = fov
+	depth_camera.near = near
+	depth_camera.far = far
+	compare_cam.fov = fov
+	compare_cam.near = near
+	compare_cam.far = far
+
+	if compare_enabled:
+		compare_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	else:
+		compare_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 
 	var mat = projection_rect.material as ShaderMaterial
-	mat.set_shader_parameter("is_enabled", is_enabled)
+	mat.set_shader_parameter("is_enabled", timewarp_enabled)
+	mat.set_shader_parameter("compare_enabled", compare_enabled)
 
-	if is_enabled:
+	if timewarp_enabled:
 
 		mat.set_shader_parameter("stretch_borders", stretch_borders)
 		mat.set_shader_parameter("reproject_movement", reproject_movement)
 
 		# update the projection cam in the shader with the actual camera postition
-		mat.set_shader_parameter("near_clip", camera.near)
-		mat.set_shader_parameter("far_clip", camera.far)
+		mat.set_shader_parameter("near_clip", near)
+		mat.set_shader_parameter("far_clip", far)
 		mat.set_shader_parameter("cam_pos", camera.global_position)
 		mat.set_shader_parameter("cam_forward", -camera.global_transform.basis.z)
 
-		var projection = Projection.create_perspective(camera.fov, size.aspect(), camera.near, camera.far, false)
+		var projection = Projection.create_perspective(fov, size.aspect(), near, far, false)
 		var view_mat = Projection(camera.global_transform).inverse()
 		var proj_mat = projection
 		mat.set_shader_parameter("world_to_camera_matrix", view_mat)
